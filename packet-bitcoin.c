@@ -91,10 +91,11 @@ static const value_string sendcmpct_version[] =
 };
 
 static const value_string sendcmpct_modes[] =
-{
-  { 0, "Low Bandwidth Mode" },
-  { 1, "High Bandwidth Mode" }
-};
+    {
+        { 0, "Low Bandwidth Mode" },
+        { 1, "High Bandwidth Mode" }
+    };
+
 
 /*
  * Minimum bitcoin identification header.
@@ -569,10 +570,10 @@ static header_field_info hfi_bitcoin_msg_sendcmpct BITCOIN_HFI_INIT =
   { "Sendcmpct message", "bitcoin.sendcmpct", FT_NONE, BASE_NONE, NULL, 0x0, NULL, HFILL };
 
 static header_field_info hfi_msg_sendcmpct_mode BITCOIN_HFI_INIT =
-  { "Mode", "bitcoin.sendcmpct.mode", FT_UINT8, BASE_DEC, VALS(sendcmpct_version), 0x0, NULL, HFILL };
+  { "Mode", "bitcoin.sendcmpct.mode", FT_UINT8, BASE_DEC, VALS(sendcmpct_modes), 0x0, NULL, HFILL };
 
 static header_field_info hfi_msg_sendcmpct_version BITCOIN_HFI_INIT =
-  { "Version", "bitcoin.sendcmpct.version", FT_UINT64, BASE_DEC, VALS(sendcmpct_version), 0x0, NULL, HFILL };
+  { "Version", "bitcoin.sendcmpct.version", FT_UINT32, BASE_DEC, VALS(sendcmpct_version), 0x0, NULL, HFILL };
 
 /* services */
 static header_field_info hfi_services_network BITCOIN_HFI_INIT =
@@ -1134,7 +1135,7 @@ dissect_bitcoin_msg_tx_common(tvbuff_t *tvb, guint32 offset, packet_info *pinfo,
   if (msgnum == 0) {
     rti  = proto_tree_add_item(tree, &hfi_bitcoin_msg_tx, tvb, offset, -1, ENC_NA);
   } else {
-    rti  = proto_tree_add_none_format(tree, hfi_bitcoin_msg_tx.id, tvb, offset, -1, "Tx message [ %4d ]", msgnum);
+    rti  = proto_tree_add_none_format(tree, &hfi_bitcoin_msg_tx, tvb, offset, -1, "Tx message [ %4d ]", msgnum);
   }
   tree = proto_item_add_subtree(rti, ett_bitcoin_msg);
 
@@ -1621,9 +1622,9 @@ static int dissect_bitcoin_tcp_pdu(tvbuff_t *tvb, packet_info *pinfo, proto_tree
 
   /* add basic protocol data */
   proto_tree_add_item(tree, &hfi_bitcoin_magic,   tvb,  0,  4, ENC_BIG_ENDIAN);
-  proto_tree_add_item_ret_string(tree, hfi_bitcoin_command.id, tvb,  4, 12, ENC_ASCII|ENC_NA, wmem_packet_scope(), &command);
+  proto_tree_add_item_ret_string(tree, &hfi_bitcoin_command, tvb,  4, 12, ENC_ASCII|ENC_NA, wmem_packet_scope(), &command);
   proto_tree_add_item(tree, &hfi_bitcoin_length,  tvb, 16,  4, ENC_LITTLE_ENDIAN);
-  proto_tree_add_checksum(tree, tvb, 20, hfi_bitcoin_checksum.id, -1, NULL, pinfo, 0, ENC_BIG_ENDIAN, PROTO_CHECKSUM_NO_FLAGS);
+  proto_tree_add_checksum(tree, tvb, 20, &hfi_bitcoin_checksum, -1, NULL, pinfo, 0, ENC_BIG_ENDIAN, PROTO_CHECKSUM_NO_FLAGS);
 
   offset = 24;
 
